@@ -6,3 +6,5 @@
 **/sdkconfig.old
 **/dependencies.lock
 **/dist/*
+**/build*
+

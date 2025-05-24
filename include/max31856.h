@@ -12,27 +12,33 @@
 #include <stdbool.h>
 
 // thermocouple types
-#define MAX31856_TC_TYPE_B 0b0000 // Type B thermocouple
-#define MAX31856_TC_TYPE_E 0b0001 // Type E thermocouple
-#define MAX31856_TC_TYPE_J 0b0010 // Type J thermocouple
-#define MAX31856_TC_TYPE_K 0b0011 // Type K thermocouple
-#define MAX31856_TC_TYPE_N 0b0100 // Type N thermocouple
-#define MAX31856_TC_TYPE_R 0b0101 // Type R thermocouple
-#define MAX31856_TC_TYPE_S 0b0110 // Type S thermocouple
-#define MAX31856_TC_TYPE_T 0b0111 // Type T thermocouple
+typedef enum {
+    MAX31856_TC_TYPE_B = 0b0000, // Type B thermocouple
+    MAX31856_TC_TYPE_E = 0b0001, // Type E thermocouple
+    MAX31856_TC_TYPE_J = 0b0010, // Type J thermocouple
+    MAX31856_TC_TYPE_K = 0b0011, // Type K thermocouple
+    MAX31856_TC_TYPE_N = 0b0100, // Type N thermocouple
+    MAX31856_TC_TYPE_R = 0b0101, // Type R thermocouple
+    MAX31856_TC_TYPE_S = 0b0110, // Type S thermocouple
+    MAX31856_TC_TYPE_T = 0b0111, // Type T thermocouple
+} max31856_thermocouple_type_t;
 
 // Averaging modes
-#define MAX31856_AVERAGE_1 0b000  // No averaging
-#define MAX31856_AVERAGE_2 0b001  // Average 2 samples
-#define MAX31856_AVERAGE_4 0b010  // Average 4 samples
-#define MAX31856_AVERAGE_8 0b011  // Average 8 samples
-#define MAX31856_AVERAGE_16 0b100 // Average 16 samples
+typedef enum {
+    MAX31856_AVG_1 = 0b000,  // No averaging
+    MAX31856_AVG_2 = 0b001,  // Average 2 samples
+    MAX31856_AVG_4 = 0b010,  // Average 4 samples
+    MAX31856_AVG_8 = 0b011,  // Average 8 samples
+    MAX31856_AVG_16 = 0b100, // Average 16 samples
+} max31856_average_t;
 
 // Open-Circuit detection modes
-#define MAX31856_OC_DETECT_OFF 0b00 // Open-Circuit detection disabled
-#define MAX31856_OC_DETECT_1 0b01   // Open-Circuit detection mode 1
-#define MAX31856_OC_DETECT_2 0b10   // Open-Circuit detection mode 2
-#define MAX31856_OC_DETECT_3 0b11   // Open-Circuit detection mode 3
+typedef enum {
+    MAX31856_OC_DETECT_OFF = 0b00, // Open-Circuit detection disabled
+    MAX31856_OC_DETECT_1   = 0b01, // Open-Circuit detection mode 1
+    MAX31856_OC_DETECT_2   = 0b10, // Open-Circuit detection mode 2
+    MAX31856_OC_DETECT_3   = 0b11  // Open-Circuit detection mode 3
+} max31856_oc_detection_t;
 
 /**
  * @brief Structure representing a MAX31856 device instance.
@@ -45,9 +51,10 @@
 typedef struct max31856_dev
 {
     spi_device_handle_t spi_dev;
-    uint8_t thermocouple_type;
+    max31856_thermocouple_type_t thermocouple_type;
     bool filter_50hz;
-    uint8_t averaging;
+    max31856_average_t averaging;
+    max31856_oc_detection_t oc_detection;
     bool use_cold_junction; // If true, the cold junction compensation is enabled
 } max31856_dev_t;
 

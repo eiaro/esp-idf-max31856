@@ -23,6 +23,9 @@
 #define PIN_NUM_CLK GPIO_NUM_18
 #define PIN_NUM_CS GPIO_NUM_5
 
+#define SPI_CLOCK_HZ (1 * 1000 * 1000) // 1 MHz
+#define READ_DELAY_MS 1000
+
 static const char *TAG = "max31856_basic";
 
 esp_err_t ret;
@@ -30,12 +33,15 @@ esp_err_t ret;
 void app_main(void)
 {
     spi_device_handle_t spi;
-    max31856_dev_t max31856_device = {
+    max31856_dev_t max31856_dev = {
+        .spi_dev = NULL, // Will be set after spi_bus_add_device
         .thermocouple_type = MAX31856_TC_TYPE_K,
+        .oc_detection = MAX31856_OC_DETECT_1,
+        .use_cold_junction = true,
         .filter_50hz = true,
-        .averaging = 0,
+        .averaging = MAX31856_AVG_2,
     };
-    
+
     gpio_set_direction(PIN_NUM_CS, GPIO_MODE_OUTPUT);
 
     spi_bus_config_t buscfg = {
@@ -50,43 +56,40 @@ void app_main(void)
         .command_bits = 0,
         .address_bits = 8,
         .dummy_bits = 0,
-        .clock_speed_hz = 1 * 1000, // Clock out at 1 MHz
+        .clock_speed_hz = SPI_CLOCK_HZ,
         .mode = 1,
         .spics_io_num = PIN_NUM_CS,
         .queue_size = 1,
         .flags = SPI_DEVICE_HALFDUPLEX,
     };
-    
-    ESP_LOGI(TAG, "Initialize SPI bus: miso=%d,mosi=%d,sclk=%d", 
-        buscfg.miso_io_num,
-        buscfg.mosi_io_num,
-        buscfg.sclk_io_num
-    );
-    ESP_ERROR_CHECK(spi_bus_initialize(ESP_HOST, &buscfg, SPI_DMA_CH_AUTO));
-    ESP_ERROR_CHECK(spi_bus_add_device(ESP_HOST, &devcfg, &spi));
 
-    max31856_device.spi_dev = spi;
-    max31856_device.thermocouple_type = MAX31856_TC_TYPE_K;
-    max31856_device.use_cold_junction = true;
-    max31856_device.filter_50hz = true;
-    ESP_ERROR_CHECK(max31856_init(&max31856_device));
+    ESP_LOGI(TAG, "Initialize SPI bus: miso=%d,mosi=%d,sclk=%d",
+             buscfg.miso_io_num,
+             buscfg.mosi_io_num,
+             buscfg.sclk_io_num);
+    ESP_ERROR_CHECK(spi_bus_initialize(ESP_HOST, &buscfg, SPI_DMA_CH_AUTO));
+
+    // setup max31856 device
+    ESP_ERROR_CHECK(spi_bus_add_device(ESP_HOST, &devcfg, &spi));
+    max31856_dev.spi_dev = spi;
+    ESP_ERROR_CHECK(max31856_init(&max31856_dev));
 
     float tc_temperature, cj_temperature;
     uint8_t status;
-    while (1) {
-        max31856_read_thermocouple(&max31856_device, &tc_temperature);
-        max31856_read_cold_junction(&max31856_device, &cj_temperature);
-        max31856_read_fault_status(&max31856_device, &status);
+    while (1)
+    {
+        if (max31856_read_thermocouple(&max31856_dev, &tc_temperature) != ESP_OK)
+            ESP_LOGE(TAG, "Failed to read thermocouple");
+        if (max31856_read_cold_junction(&max31856_dev, &cj_temperature) != ESP_OK)
+            ESP_LOGE(TAG, "Failed to read cold junction");
+        if (max31856_read_fault_status(&max31856_dev, &status) != ESP_OK)
+            ESP_LOGE(TAG, "Failed to read fault status");
 
-        ESP_LOGI(TAG, "Read: tc=%f, cj=%f, status=%x", 
-            tc_temperature,
-            cj_temperature,
-            status
-        );
+        ESP_LOGI(TAG, "Read: tc=%f, cj=%f, status=%x",
+                 tc_temperature,
+                 cj_temperature,
+                 status);
 
-        // Sleep for 5 second (1000ms)
-        vTaskDelay(pdMS_TO_TICKS(5 * 1000));        
+        vTaskDelay(pdMS_TO_TICKS(READ_DELAY_MS));
     }
-
-
 }

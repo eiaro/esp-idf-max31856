@@ -87,12 +87,12 @@ esp_err_t max31856_init(max31856_dev_t *data) {
 
     /* Set the thermocouple type */
     reg_cr1_value &= ~MAX31856_CR1_TCTYPE_MASK; // Clear the TCTYPE bits
-    reg_cr1_value |= data->thermocouple_type; // Set the TCTYPE bits
+    reg_cr1_value |= (uint8_t)data->thermocouple_type; // Set the TCTYPE bits
     
 
     /* Set the averaging mode */
     reg_cr1_value &= ~MAX31856_CR1_AVERAGE_MASK; // Clear the AVERAGE bits
-    reg_cr1_value |= (data->averaging << MAX31856_CR1_AVERAGE_SHIFT); // Set the AVERAGE bits
+    reg_cr1_value |= ((uint8_t)data->averaging << MAX31856_CR1_AVERAGE_SHIFT); // Set the AVERAGE bits
     
     /* Write the CR1 */
     ret = max31856_write(data, MAX31856_CR1_REG, reg_cr1_value);
@@ -102,7 +102,7 @@ esp_err_t max31856_init(max31856_dev_t *data) {
 
     /* Set the OC detection mode */
     reg_cr0_value &= ~MAX31856_CR0_OC_MASK; // Clear the OC bits
-    reg_cr0_value |= (MAX31856_OC_DETECT_1 << MAX31856_CR0_OC_SHIFT); // Set the OC bits
+    reg_cr0_value |= ((uint8_t)data->oc_detection << MAX31856_CR0_OC_SHIFT); // Set the OC bits
 
     /* set Auto Conversion Mode back on */
     reg_cr0_value &= ~MAX31856_CR0_1SHOT; // Clear the 1SHOT bit
