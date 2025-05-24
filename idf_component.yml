@@ -1,0 +1,7 @@
+# Copyright (c) 2025 Ronny Eia
+# SPDX-License-Identifier: MIT
+
+version: "0.0.1"
+description: "This is a test component"
+url: "https://mycomponent.com"  # The homepage of the component. It can be a GitHub repository page.
+license: "MIT"  # The license of the component. It can be a SPDX license identifier or a URL to the license file.

@@ -1,0 +1,11 @@
+menu "MAX31856 Configuration"
+
+config MAX31856_ENABLE_DEBUG_LOG
+    bool "Enable debug logging for MAX31856"
+    default n
+    help
+        Enables debug level logging for the MAX31856 thermocouple driver.
+        This provides detailed information about register reads and writes
+        and is useful for troubleshooting SPI communication issues.
+
+endmenu
