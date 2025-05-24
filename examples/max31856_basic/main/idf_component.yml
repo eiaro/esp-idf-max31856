@@ -1,0 +1,6 @@
+version: 1.0.0
+description: "This is a test component"
+dependencies:
+  eiaro/max31856:  # The name of the component. It can be a GitHub repository name or a local path.
+    override_path: '../../../'
+    
