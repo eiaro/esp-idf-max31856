@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Ronny Eia <3652665+eiaro@users.noreply.github.com>
+#
+# SPDX-License-Identifier: MIT
+
 menu "MAX31856 Configuration"
 
 config MAX31856_ENABLE_DEBUG_LOG
