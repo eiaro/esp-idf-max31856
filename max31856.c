@@ -11,6 +11,11 @@
 
 static const char *TAG = "max31856";
 
+/* Forward declarations of helper functions */
+static float parse_thermocouple(uint8_t msb, uint8_t mid, uint8_t lsb);
+static float parse_cold_junction(uint8_t cjth, uint8_t cjtl);
+
+/* Low-level SPI communication functions */
 esp_err_t max31856_write(max31856_dev_t *data, uint8_t addr, uint8_t value) {
     spi_transaction_t t = { 
         .addr = (addr | MAX31856_RD_WR_MASK), // Send the address to write to               
@@ -55,6 +60,7 @@ esp_err_t max31856_read(max31856_dev_t *data, uint8_t addr, uint8_t *value) {
     return ESP_OK;
 }
 
+/* Main public API functions */
 esp_err_t max31856_init(max31856_dev_t *data) {
     esp_err_t ret;
     uint8_t reg_cr0_value, reg_cr1_value;
@@ -143,14 +149,17 @@ esp_err_t max31856_read_thermocouple(max31856_dev_t *data, float *temperature) {
     // Convert to temperature in Celsius
     *temperature = parse_thermocouple(ltcbh, ltcbm, ltcbl);
 
+    #ifdef CONFIG_MAX31856_ENABLE_SELF_TEST
+    // Self-test for known values
     if (parse_thermocouple(0b11110000, 0b01100000, 0b00000000) != -250.0) {
         ESP_LOGE(TAG, "Thermocouple parsing function failed");
         return ESP_ERR_INVALID_STATE; // Parsing function failed
-    }; // Ensure the parsing function works correctly
+    };
     if (parse_thermocouple(0b00000110, 0b01001111, 0b00000000) != 100.9375) {
         ESP_LOGE(TAG, "Thermocouple parsing function failed");
         return ESP_ERR_INVALID_STATE; // Parsing function failed
-    }; // Ensure the parsing function works correctly
+    };
+    #endif
 
 
     return ESP_OK;
@@ -173,22 +182,39 @@ esp_err_t max31856_read_cold_junction(max31856_dev_t *data, float *temperature) 
 
     *temperature = parse_cold_junction(cjth, cjtl);
     
-    // TODO: Remove this after testing
+    #ifdef CONFIG_MAX31856_ENABLE_SELF_TEST
+    // Self-test for known values
     if (parse_cold_junction(0b01111111, 0b11111100) != 127.984375) {
         ESP_LOGE(TAG, "Cold junction parsing function failed");
-        return ESP_ERR_INVALID_STATE; // Parsing function failed
-    }; // Ensure the parsing function works correctly
-
-    // TODO: Remove this after testing
+        return ESP_ERR_INVALID_STATE;
+    };
     if (parse_cold_junction(0b11001001, 0b00000000) != -55.0) {
         ESP_LOGE(TAG, "Cold junction parsing function failed");
-        return ESP_ERR_INVALID_STATE; // Parsing function failed
-    }; // Ensure the parsing function works correctly
+        return ESP_ERR_INVALID_STATE;
+    };
+    #endif
 
     return ESP_OK;
 }
 
-float parse_cold_junction(uint8_t cjth, uint8_t cjtl) {
+esp_err_t max31856_read_fault_status(max31856_dev_t *data, uint8_t *status) {
+    esp_err_t ret;
+
+    // Read the fault status register
+    ret = max31856_read(data, MAX31856_SR_REG, status);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    #ifdef CONFIG_MAX31856_ENABLE_DEBUG_LOG
+    ESP_LOGD(TAG, "Fault Status Register: 0x%02x", *status);
+    #endif
+
+    return ESP_OK;
+}
+
+/* Helper functions for temperature conversion */
+static float parse_cold_junction(uint8_t cjth, uint8_t cjtl) {
     int8_t integer_part = (int8_t)cjth;        // signed heltallsdel
     uint8_t frac_raw = cjtl >> 2;              // få ut de 6 gyldige bitene
 
@@ -210,21 +236,4 @@ float parse_thermocouple(uint8_t msb, uint8_t mid, uint8_t lsb) {
     }
 
     return raw * 0.0078125f;  // 1/128 = 0.0078125 °C per LSB
-}
-
-
-esp_err_t max31856_read_fault_status(max31856_dev_t *data, uint8_t *status) {
-    esp_err_t ret;
-
-    // Read the fault status register
-    ret = max31856_read(data, MAX31856_SR_REG, status);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-
-    #ifdef CONFIG_MAX31856_ENABLE_DEBUG_LOG
-    ESP_LOGD(TAG, "Fault Status Register: 0x%02x", *status);
-    #endif
-
-    return ESP_OK;
 }

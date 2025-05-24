@@ -26,17 +26,16 @@
  */
 #define GENMASK(h, l) (((1UL << ((h) - (l) + 1)) - 1) << (l))
 
-#define MAX31856_RD_WR_MASK BIT(7)
-#define MAX31856_CR1_TCTYPE_MASK GENMASK(3, 0)
-#define MAX31856_CR1_AVERAGE_MASK GENMASK(6, 4)
-#define MAX31856_CR1_AVERAGE_SHIFT 4
-#define MAX31856_CR0_OC_MASK GENMASK(5, 4)
-#define MAX31856_CR0_OC_SHIFT 4
-#define MAX31856_CR0_AUTOCONVERT BIT(7)
-#define MAX31856_CR0_1SHOT BIT(6)
-#define MAX31856_CR0_CJ BIT(3)
-#define MAX31856_CR0_FAULT BIT(2)
-
+#define MAX31856_RD_WR_MASK BIT(7)              // Read/Write mask for SPI transactions
+#define MAX31856_CR1_TCTYPE_MASK GENMASK(3, 0)  // Thermocouple type mask
+#define MAX31856_CR1_AVERAGE_MASK GENMASK(6, 4) // Averaging mode mask
+#define MAX31856_CR1_AVERAGE_SHIFT 4            // Shift for averaging mode bits
+#define MAX31856_CR0_OC_MASK GENMASK(5, 4)      // Open-Circuit detection mode mask
+#define MAX31856_CR0_OC_SHIFT 4                 // Shift for Open-Circuit detection mode bits
+#define MAX31856_CR0_AUTOCONVERT BIT(7)         // Auto Conversion Mode bit
+#define MAX31856_CR0_1SHOT BIT(6)               // One-Shot Mode bit
+#define MAX31856_CR0_CJ BIT(3)                  // Cold Junction Compensation bit
+#define MAX31856_CR0_FAULT BIT(2)               // Fault Output bit
 
 // registers
 #define MAX31856_CR0_REG 0x00    // Configuration Register 0
@@ -56,10 +55,34 @@
 #define MAX31856_LTCBL_REG 0x0E  // Linearized TC Temperature, Byte 0
 #define MAX31856_SR_REG 0x0F     // Fault Status Register
 
-
-
-
+/**
+ * @brief Write a value to a specific register address of the MAX31856 device.
+ *
+ * This function writes a single byte value to the specified register address
+ * of the MAX31856 thermocouple-to-digital converter via SPI.
+ *
+ * @param[in] data   Pointer to the MAX31856 device structure.
+ * @param[in] addr   Register address to write to.
+ * @param[in] value  Value to write to the register.
+ *
+ * @return
+ *     - ESP_OK on success
+ *     - Appropriate esp_err_t error code otherwise
+ */
 esp_err_t max31856_write(max31856_dev_t *data, uint8_t addr, uint8_t value);
-float parse_cold_junction(uint8_t cjth, uint8_t cjtl);
-float parse_thermocouple(uint8_t msb, uint8_t mid, uint8_t lsb);
+
+/**
+ * @brief Read a value from a specific register address of the MAX31856 device.
+ *
+ * This function reads a single byte value from the specified register address
+ * of the MAX31856 thermocouple-to-digital converter via SPI.
+ *
+ * @param[in] data   Pointer to the MAX31856 device structure.
+ * @param[in] addr   Register address to read from.
+ * @param[out] value Pointer to store the read value.
+ *
+ * @return
+ *     - ESP_OK on success
+ *     - Appropriate esp_err_t error code otherwise
+ */
 esp_err_t max31856_read(max31856_dev_t *data, uint8_t addr, uint8_t *value);
