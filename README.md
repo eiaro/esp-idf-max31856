@@ -25,7 +25,7 @@ This component provides an ESP-IDF driver for the [MAX31856](https://www.analog.
    ```sh
    cd your_project
    mkdir -p components
-   git clone https://github.com/eiaro/max31856.git components/max31856
+   git clone https://github.com/eiaro/esp-idf-max31856.git components/max31856
    ```
 
 2. Include the component in your project's CMakeLists.txt:
