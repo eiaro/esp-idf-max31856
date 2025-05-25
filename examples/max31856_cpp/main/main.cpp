@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Ronny Eia <3652665+eiaro@users.noreply.github.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/spi_master.h"
