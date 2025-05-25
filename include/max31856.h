@@ -11,6 +11,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // thermocouple types
 typedef enum {
     MAX31856_TC_TYPE_B = 0b0000, // Type B thermocouple
@@ -114,3 +118,7 @@ esp_err_t max31856_read_cold_junction(max31856_dev_t *data, float *temperature);
  *     - Appropriate error code otherwise
  */
 esp_err_t max31856_read_fault_status(max31856_dev_t *data, uint8_t *status);
+
+#ifdef __cplusplus
+}
+#endif

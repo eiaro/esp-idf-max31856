@@ -9,6 +9,10 @@
 #include "esp_err.h"
 #include "driver/spi_master.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Creates a contiguous bitmask spanning from bit position 'l' to 'h' (inclusive)
  *
@@ -86,3 +90,7 @@ esp_err_t max31856_write(max31856_dev_t *data, uint8_t addr, uint8_t value);
  *     - Appropriate esp_err_t error code otherwise
  */
 esp_err_t max31856_read(max31856_dev_t *data, uint8_t addr, uint8_t *value);
+
+#ifdef __cplusplus
+}
+#endif
