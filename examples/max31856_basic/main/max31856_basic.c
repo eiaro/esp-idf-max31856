@@ -61,6 +61,11 @@ void app_main(void)
         .spics_io_num = PIN_NUM_CS,
         .queue_size = 1,
         .flags = SPI_DEVICE_HALFDUPLEX,
+
+        // This may be needed for some, ref issue #1
+        // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/spi_master.html#_CPPv4N29spi_device_interface_config_t15cs_ena_pretransE
+        .cs_ena_pretrans = 2,
+        .cs_ena_posttrans = 2,
     };
 
     ESP_LOGI(TAG, "Initialize SPI bus: miso=%d,mosi=%d,sclk=%d",
